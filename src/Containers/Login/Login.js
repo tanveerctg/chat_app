@@ -4,6 +4,9 @@ import TextField from "@material-ui/core/TextField";
 import Grid from "@material-ui/core/Grid";
 import AccountCircle from "@material-ui/icons/AccountCircle";
 import LockIcon from "@material-ui/icons/Lock";
+import indigo from "@material-ui/core/colors/indigo";
+import grey from "@material-ui/core/colors/grey";
+
 const useStyles = makeStyles(theme => ({
   wrapper: {
     height: "100vh",
@@ -58,6 +61,8 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export default function Login() {
+  const user = indigo[500];
+  const pass = grey[800];
   const classes = useStyles();
   return (
     <div className={classes.wrapper}>
@@ -66,7 +71,7 @@ export default function Login() {
         <form className={classes.form}>
           <Grid container spacing={1} alignItems="flex-end">
             <Grid item>
-              <AccountCircle />
+              <AccountCircle style={{ color: user }} />
             </Grid>
             <Grid item style={{ width: "90%" }}>
               <TextField
@@ -79,7 +84,7 @@ export default function Login() {
           <div style={{ lineHeight: "15px" }}>&nbsp;</div>
           <Grid container spacing={1} alignItems="flex-end">
             <Grid item>
-              <LockIcon />
+              <LockIcon style={{ color: pass }} />
             </Grid>
             <Grid item style={{ width: "90%" }}>
               <TextField
