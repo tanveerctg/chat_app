@@ -6,6 +6,12 @@ import AccountCircle from "@material-ui/icons/AccountCircle";
 import LockIcon from "@material-ui/icons/Lock";
 import MailOutlineIcon from "@material-ui/icons/MailOutline";
 import ConfirmationNumberIcon from "@material-ui/icons/ConfirmationNumber";
+import { firebase } from "../../firebase";
+import { connect } from "react-redux";
+import { credentialReducer, LOG_IN, LOG_OUT } from "../../Reducer/Credential";
+import { LOADING_ON, LOADING_OFF } from "../../Reducer/LoadingReducer";
+import { useHistory } from "react-router-dom";
+
 const useStyles = makeStyles(theme => ({
   wrapper: {
     height: "100vh",
@@ -56,13 +62,16 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function Login() {
+function Login(props) {
   const classes = useStyles();
   const [userName, setUserName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState([]);
+  const userDatabaseRef = firebase.database().ref("Users");
+  let history = useHistory();
+
   const handleUserName = e => {
     setUserName(e.target.value);
   };
@@ -95,33 +104,69 @@ export default function Login() {
       err.push("Password should be atleast 6 character.");
       setError(err);
       return false;
+      console.log("1st");
     } else if (password !== confirmPassword) {
       setError([]);
       err.push("Password mismatch.");
       setError(err);
       return false;
+      console.log("2nd");
+    } else {
+      return true;
     }
   };
   const isFormValid = () => {
     if (!isFormEmpty()) {
       console.log("EMPTY");
       return false;
-    } else if (isPasswordValid()) {
+    } else if (!isPasswordValid()) {
+      console.log("PASS Word invalid");
       return false;
     } else {
       return true;
     }
   };
+
   const handleSubmit = e => {
     e.preventDefault();
+    const err = [];
     if (isFormValid()) {
       setError([]);
+      props.dispatch({
+        type: LOADING_ON
+      });
+      firebase
+        .auth()
+        .createUserWithEmailAndPassword(email, password)
+        .then(res => {
+          // res.user.providerData[0].displayName = userName;
+
+          console.log(res.user.uid);
+          const name = userName;
+          const pass = password;
+          const id = res.user.uid;
+          const avatarUrl = `https://ui-avatars.com/api/?name=${name}`;
+          userDatabaseRef.child(id).update({ name, pass, id, avatarUrl });
+          props.dispatch({
+            type: LOADING_OFF
+          });
+          console.log({ name, pass, id, avatarUrl });
+          history.push("/");
+        })
+        .catch(function(error) {
+          // Handle Errors here.
+          var errorCode = error.code;
+          var errorMessage = error.message;
+          err.push(errorMessage);
+          setError(err);
+          // ...
+        });
       console.log("ok");
     } else {
       console.log("not ok");
     }
   };
-  console.log(error);
+
   return (
     <div className={classes.wrapper}>
       <div className={classes.container}>
@@ -153,6 +198,7 @@ export default function Login() {
                 label="Email"
                 style={{ width: "100%" }}
                 onChange={handleEmail}
+                type="email"
               />
             </Grid>
           </Grid>
@@ -203,3 +249,14 @@ export default function Login() {
     </div>
   );
 }
+
+const mapStateToProps = state => {
+  console.log("state", state);
+};
+// const mapDispatchToProps = dispatch => {
+//   return {
+//     login: dispatch({ type: LOG_IN, id, userName, avatarUrl })
+//   };
+// };
+
+export default connect(mapStateToProps)(Login);

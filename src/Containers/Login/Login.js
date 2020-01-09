@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
 import Grid from "@material-ui/core/Grid";
@@ -6,6 +6,10 @@ import AccountCircle from "@material-ui/icons/AccountCircle";
 import LockIcon from "@material-ui/icons/Lock";
 import indigo from "@material-ui/core/colors/indigo";
 import grey from "@material-ui/core/colors/grey";
+import { firebase } from "../../firebase";
+import { LOADING_ON, LOADING_OFF } from "../../Reducer/LoadingReducer";
+import { connect } from "react-redux";
+import { useHistory } from "react-router-dom";
 
 const useStyles = makeStyles(theme => ({
   wrapper: {
@@ -60,15 +64,66 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function Login() {
+function Login(props) {
+  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState([]);
   const user = indigo[500];
   const pass = grey[800];
   const classes = useStyles();
+  let history = useHistory();
+
+  const handleEmail = e => {
+    setEmail(e.target.value);
+  };
+  const handlePassword = e => {
+    setPassword(e.target.value);
+  };
+  const handleSubmit = e => {
+    e.preventDefault();
+    const err = [];
+    if (!isFormEmpty()) {
+      console.log("NOT OK");
+    } else {
+      setError([]);
+      props.dispatch({
+        type: LOADING_ON
+      });
+      firebase
+        .auth()
+        .signInWithEmailAndPassword(email, password)
+        .then(res => {
+          props.dispatch({
+            type: LOADING_OFF
+          });
+          history.push("/");
+        })
+        .catch(function(error) {
+          // Handle Errors here.
+          var errorCode = error.code;
+          var errorMessage = error.message;
+          err.push(errorMessage);
+          setError(err);
+          // ...
+        });
+      console.log("All OK");
+    }
+  };
+  const isFormEmpty = () => {
+    const err = [];
+    let value = !!email.length && !!password.length;
+    if (!value) {
+      err.push("Please fill in all fields.");
+      setError(err);
+    }
+    return value;
+  };
+
   return (
     <div className={classes.wrapper}>
       <div className={classes.container}>
         <h1 className={classes.login}>Login</h1>
-        <form className={classes.form}>
+        <form className={classes.form} onSubmit={handleSubmit}>
           <Grid container spacing={1} alignItems="flex-end">
             <Grid item>
               <AccountCircle style={{ color: user }} />
@@ -77,6 +132,8 @@ export default function Login() {
               <TextField
                 id="input-with-icon-grid"
                 label="Email"
+                onChange={handleEmail}
+                type="email"
                 style={{ width: "100%" }}
               />
             </Grid>
@@ -91,11 +148,15 @@ export default function Login() {
                 id="input-with-icon-grid"
                 label="Password"
                 style={{ width: "100%" }}
+                onChange={handlePassword}
+                type="password"
               />
             </Grid>
           </Grid>
           <div style={{ lineHeight: "50px" }}>&nbsp;</div>
-          <button className={classes.loginBtn}>Log in</button>
+          <button className={classes.loginBtn} type="submit">
+            Log in
+          </button>
           <div style={{ lineHeight: "15px" }}>&nbsp;</div>
           <p>
             Don't have an account?{" "}
@@ -109,3 +170,4 @@ export default function Login() {
     </div>
   );
 }
+export default connect()(Login);

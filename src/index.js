@@ -4,10 +4,31 @@ import { BrowserRouter } from "react-router-dom";
 import "./index.css";
 import App from "./App";
 import * as serviceWorker from "./serviceWorker";
+import { createStore, applyMiddleware, compose, combineReducers } from "redux";
+import thunk from "redux-thunk";
+import { Provider } from "react-redux";
+import { credentialReducer, LOG_IN, LOG_OUT } from "./Reducer/Credential";
+import {
+  LOADING_ON,
+  LOADING_OFF,
+  LoadingReducer
+} from "./Reducer/LoadingReducer";
 
+const composeEnhancer = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+
+const rootReducer = {
+  credentialReducer: credentialReducer,
+  Loading: LoadingReducer
+};
+export const store = createStore(
+  combineReducers(rootReducer),
+  composeEnhancer(applyMiddleware(thunk))
+);
 ReactDOM.render(
   <BrowserRouter>
-    <App />
+    <Provider store={store}>
+      <App />
+    </Provider>
   </BrowserRouter>,
   document.getElementById("root")
 );
