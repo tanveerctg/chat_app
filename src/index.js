@@ -13,12 +13,14 @@ import {
   LOADING_OFF,
   LoadingReducer
 } from "./Reducer/LoadingReducer";
+import { Channel } from "./Reducer/Channel";
 
 const composeEnhancer = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
 const rootReducer = {
   credentialReducer: credentialReducer,
-  Loading: LoadingReducer
+  Loading: LoadingReducer,
+  Channel: Channel
 };
 export const store = createStore(
   combineReducers(rootReducer),

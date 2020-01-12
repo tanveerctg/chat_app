@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import AppBar from "@material-ui/core/AppBar";
 import CssBaseline from "@material-ui/core/CssBaseline";
@@ -34,6 +34,7 @@ import Dialog from "@material-ui/core/Dialog";
 import PersonIcon from "@material-ui/icons/Person";
 import AddIcon from "@material-ui/icons/Add";
 import AddChannel from "../../Component/AddChannel/AddChannel";
+import { useSelector, useDispatch } from "react-redux";
 //CSS
 import useStyles from "../../Styles/Dahboard";
 
@@ -66,11 +67,30 @@ const StyledBadge = withStyles(theme => ({
   }
 }))(Badge);
 
+function ChannelList() {
+  const { credentialReducer, Loading, Channel } = useSelector(state => state);
+  const [clickedItem, setClickedItem] = useState(0);
+  useEffect(() => {
+    console.log("CHANGEDDDDD");
+  }, [clickedItem]);
+  return Channel.channels.map((channel, index) => {
+    return (
+      <ListItem
+        button
+        onClick={() => setClickedItem(index)}
+        selected={index === clickedItem}
+      >
+        <ListItemText primary={channel.name} />
+      </ListItem>
+    );
+  });
+}
 function ResponsiveDrawer(props) {
   const { container } = props;
   const classes = useStyles();
   const theme = useTheme();
   const [mobileOpen, setMobileOpen] = React.useState(false);
+
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
@@ -139,26 +159,9 @@ function ResponsiveDrawer(props) {
           <MenuItem onClick={() => handleClose("tanveer")}>Logout</MenuItem>
         </Menu>
       </div>
-
       <List>
         <AddChannel />
-        <ListItem button>
-          <ListItemText primary="Food Channel" />
-        </ListItem>
-        <ListItem button selected={true}>
-          <ListItemText primary="Food Channel" />
-        </ListItem>
-      </List>
-      <Divider />
-      <List>
-        {["All mail", "Trash", "Spam"].map((text, index) => (
-          <ListItem button key={text}>
-            <ListItemIcon>
-              {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-            </ListItemIcon>
-            <ListItemText primary={text} />
-          </ListItem>
-        ))}
+        <ChannelList />
       </List>
     </div>
   );
@@ -219,6 +222,7 @@ function ResponsiveDrawer(props) {
             }}
             variant="permanent"
             open
+            setClickedItem={s => console.log(s)}
           >
             {drawer}
           </Drawer>

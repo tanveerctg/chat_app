@@ -18,12 +18,11 @@ import { firebase } from "../src/firebase";
 import { connect } from "react-redux";
 import Loading from "./Component/Loading/Loading";
 import { store } from "../src/index";
-
+import { SET_INITIAL_CHANNEL } from "../src/Reducer/Channel";
 function App(props) {
   useEffect(() => {
     firebase.auth().onAuthStateChanged(function(user) {
       if (user) {
-        console.log(user);
         firebase
           .database()
           .ref(`Users/${user.uid}`)
@@ -37,6 +36,27 @@ function App(props) {
               avatarUrl: avatarUrl
             });
           });
+
+        firebase
+          .database()
+          .ref("Channels")
+          .once("value")
+          .then(function(snapshot) {
+            let allChannels = [];
+            for (let k in snapshot.val()) {
+              for (let d in snapshot.val()[k]) {
+                allChannels.push(snapshot.val()[k][d]);
+              }
+            }
+            return allChannels;
+          })
+          .then(res => {
+            console.log(res);
+            store.dispatch({
+              type: SET_INITIAL_CHANNEL,
+              allChannels: [...res]
+            });
+          });
       } else {
         // User is signed out.
         // ...
@@ -44,7 +64,6 @@ function App(props) {
       }
     });
   });
-  console.log(props);
 
   return props.loading ? (
     <Loading />

@@ -10,6 +10,7 @@ import { firebase } from "../../firebase";
 import { LOADING_ON, LOADING_OFF } from "../../Reducer/LoadingReducer";
 import { connect } from "react-redux";
 import { useHistory } from "react-router-dom";
+import { CLEAR_CHANNELS } from "../../Reducer/Channel";
 
 const useStyles = makeStyles(theme => ({
   wrapper: {
@@ -96,6 +97,7 @@ function Login(props) {
           props.dispatch({
             type: LOADING_OFF
           });
+          props.dispatch({ type: CLEAR_CHANNELS });
           history.push("/");
         })
         .catch(function(error) {
