@@ -2,16 +2,10 @@ import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import AppBar from "@material-ui/core/AppBar";
 import CssBaseline from "@material-ui/core/CssBaseline";
-import Divider from "@material-ui/core/Divider";
 import Drawer from "@material-ui/core/Drawer";
 import Hidden from "@material-ui/core/Hidden";
 import IconButton from "@material-ui/core/IconButton";
-import InboxIcon from "@material-ui/icons/MoveToInbox";
 import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import ListItemText from "@material-ui/core/ListItemText";
-import MailIcon from "@material-ui/icons/Mail";
 import MenuIcon from "@material-ui/icons/Menu";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
@@ -20,21 +14,21 @@ import Avatar from "@material-ui/core/Avatar";
 import InsertEmoticonIcon from "@material-ui/icons/InsertEmoticon";
 import PhotoIcon from "@material-ui/icons/Photo";
 import SendIcon from "@material-ui/icons/Send";
-import AddCircleOutlineIcon from "@material-ui/icons/AddCircleOutline";
 import pizza from "./pizza.png";
-import Button from "@material-ui/core/Button";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 import Badge from "@material-ui/core/Badge";
 import { withStyles } from "@material-ui/core/styles";
 import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
-import ListItemAvatar from "@material-ui/core/ListItemAvatar";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import Dialog from "@material-ui/core/Dialog";
-import PersonIcon from "@material-ui/icons/Person";
-import AddIcon from "@material-ui/icons/Add";
 import AddChannel from "../../Component/AddChannel/AddChannel";
+import ChannelList from "../../Component/ChannelList/ChannelList";
 import { useSelector, useDispatch } from "react-redux";
+import { firebase } from "../../firebase";
+import Picker from "emoji-picker-react";
+import Popover from "@material-ui/core/Popover";
+import DeleteIcon from "@material-ui/icons/Delete";
+import uuidv4 from "uuid/v4";
+import CircularProgress from "@material-ui/core/CircularProgress";
 //CSS
 import useStyles from "../../Styles/Dahboard";
 
@@ -67,46 +61,172 @@ const StyledBadge = withStyles(theme => ({
   }
 }))(Badge);
 
-function ChannelList() {
-  const { credentialReducer, Loading, Channel } = useSelector(state => state);
-  const [clickedItem, setClickedItem] = useState(0);
-  useEffect(() => {
-    console.log("CHANGEDDDDD");
-  }, [clickedItem]);
-  return Channel.channels.map((channel, index) => {
-    return (
-      <ListItem
-        button
-        onClick={() => setClickedItem(index)}
-        selected={index === clickedItem}
-      >
-        <ListItemText primary={channel.name} />
-      </ListItem>
-    );
-  });
-}
 function ResponsiveDrawer(props) {
   const { container } = props;
   const classes = useStyles();
   const theme = useTheme();
-  const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const { credentialReducer, Loading, Channel } = useSelector(state => state);
+  const [chosenEmoji, setChosenEmoji] = useState([]);
+  const [allEmoji, setAllEmoji] = useState([]);
+  const [message, setMessage] = useState("");
+  const [picSelected, setPicSelected] = useState(false);
+  const [picUpload, setPicUpload] = useState(null);
+  const [picName, setPicName] = useState(null);
+  const [picUrl, setPicUrl] = useState(null);
+  const [allPics, setAllPics] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
   //Menu Toggle
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
 
   const handleClick = event => {
     setAnchorEl(event.currentTarget);
   };
-
   const handleClose = tanveer => {
-    console.log(tanveer);
     setAnchorEl(null);
   };
 
+  //EMOJI POPOVER
+  const [anchorEmoji, setAnchorEmoji] = useState(null);
+
+  const handleEmojiOpen = event => {
+    setAnchorEmoji(event.currentTarget);
+  };
+
+  const handleEmojiClose = () => {
+    setAnchorEmoji(null);
+  };
+
+  const open = Boolean(anchorEmoji);
+  const id = open ? "simple-popover" : undefined;
+
+  //EMOJI PICKER
+  const onEmojiClick = (event, emojiObject) => {
+    setChosenEmoji(chosenEmoji.push(emojiObject));
+    let joinAllEmoji = chosenEmoji.map(emoji => emoji.emoji).join("");
+    setMessage(`${message}${joinAllEmoji}`);
+  };
+
+  //TYPE_MESSAGE_HANDLER
+  const typeMessageHandler = e => {
+    setMessage(e.target.value);
+  };
+
+  const signOut = () => {
+    firebase
+      .auth()
+      .signOut()
+      .then(function() {
+        props.history.push("/login");
+      })
+      .catch(function(error) {
+        // An error happened.
+      });
+    console.log("Sign Out");
+  };
+  const picUploadHandler = e => {
+    // setPicUpload(e.target.files[0]);
+    const path = Channel.CLICKED_CHANNEL.publicChannel ? "public" : "private";
+    const uuid = uuidv4() + path;
+    setLoading(true);
+    if (path) {
+      firebase
+        .storage()
+        .ref(`${path}/${uuid}`)
+        .put(e.target.files[0])
+        .on(
+          "state_changed",
+          snapshot => {},
+          e => {
+            console.log(e);
+          },
+          () => {
+            firebase
+              .storage()
+              .ref(`${path}/${uuid}`)
+              .getDownloadURL()
+              .then(name => {
+                // setAllPics([allPics, last_Element]);
+                setPicUrl(name);
+                setAllPics([
+                  ...allPics,
+                  { id: uuid, url: name, loading: true }
+                ]);
+                setLoading(false);
+              });
+          }
+        );
+    }
+
+    // console.log(mime.getType(e.target.files[0].name));
+  };
+  const deletePicHandler = id => {
+    // var desertRef = storageRef.child("images/desert.jpg");
+
+    // // Delete the file
+    // desertRef
+    //   .delete()
+    //   .then(function() {
+    //     // File deleted successfully
+    //   })
+    //   .catch(function(error) {
+    //     // Uh-oh, an error occurred!
+    //   });
+    setAllPics(allPics.filter(elm => elm.id !== id));
+    const str = id;
+    const regex = RegExp("public", "gi");
+    if (regex.test(str)) {
+      firebase
+        .storage()
+        .ref(`public/${id}`)
+        .delete()
+        .then(() => {})
+        .catch(function(error) {
+          // Uh-oh, an error occurred!
+        });
+      console.log("public");
+    } else {
+      firebase
+        .storage()
+        .ref(`private/${id}`)
+        .delete()
+        .then(() => {})
+        .catch(function(error) {
+          // Uh-oh, an error occurred!
+        });
+    }
+  };
+  const sendPic = () => {
+    const path = Channel.CLICKED_CHANNEL.publicChannel ? "public" : "private";
+    const uuid = uuidv4() + path;
+    console.log(picUpload, path);
+    firebase
+      .storage()
+      .ref(`${path}/${uuid}`)
+      .put(picUpload)
+      .on(
+        "state_changed",
+        snapshot => {},
+        e => {
+          console.log(e);
+        },
+        () => {
+          firebase
+            .storage()
+            .ref(`${path}/${uuid}`)
+            .getDownloadURL()
+            .then(name => {
+              setPicUrl(name);
+              console.log("url", name);
+            });
+        }
+      );
+  };
   const drawer = (
     <div>
       <div className={classes.toolbar} />
@@ -128,7 +248,7 @@ function ResponsiveDrawer(props) {
             }}
             variant="dot"
           >
-            <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" />
+            <Avatar alt="Remy Sharp" src={credentialReducer.avatarUrl} />
           </StyledBadge>
           <div
             aria-controls="simple-menu"
@@ -141,7 +261,7 @@ function ResponsiveDrawer(props) {
               cursor: "pointer"
             }}
           >
-            Ricardo Kaka <ArrowDropDownIcon />
+            {credentialReducer.userName} <ArrowDropDownIcon />
           </div>
         </div>
 
@@ -153,10 +273,10 @@ function ResponsiveDrawer(props) {
           onClose={handleClose}
         >
           <MenuItem onClick={() => handleClose("tanveer")} disabled>
-            Profile
+            Signed in as {credentialReducer.userName}
           </MenuItem>
           <MenuItem onClick={() => handleClose("tanveer")}>My account</MenuItem>
-          <MenuItem onClick={() => handleClose("tanveer")}>Logout</MenuItem>
+          <MenuItem onClick={signOut}>Logout</MenuItem>
         </Menu>
       </div>
       <List>
@@ -228,6 +348,7 @@ function ResponsiveDrawer(props) {
           </Drawer>
         </Hidden>
       </nav>
+
       <main
         className={classes.content}
         style={{
@@ -248,6 +369,7 @@ function ResponsiveDrawer(props) {
             placeholder="Search Message..."
             className={classes.searchMessage}
           ></input>
+
           <div className={classes.bodyContent}>
             <div className={classes.eachMesssage}>
               <Avatar className={classes.orange}>N</Avatar>
@@ -294,37 +416,73 @@ function ResponsiveDrawer(props) {
               <div className={classes.message}>Pizza is Very Tasty</div>
               <div className={classes.time}>9:46 PM</div>
             </div>
-            <div className={classes.eachMesssage}>
-              <Avatar className={classes.orange}>N</Avatar>
-              <div className={classes.message}>Pizza is Very Tasty</div>
-              <div className={classes.time}>9:46 PM</div>
-            </div>
-            <div className={classes.eachMesssage}>
-              <Avatar className={classes.orange}>N</Avatar>
-              <div className={classes.message}>Pizza is Very Tasty</div>
-              <div className={classes.time}>9:46 PM</div>
-            </div>
-            <div className={classes.eachMesssage}>
-              <Avatar className={classes.orange}>N</Avatar>
-              <div className={classes.message}>Pizza is Very Tasty</div>
-              <div className={classes.time}>9:46 PM</div>
-            </div>
-            <div className={classes.eachMesssage}>
-              <Avatar className={classes.orange}>N</Avatar>
-              <div className={classes.message}>Pizza is Very Tasty</div>
-              <div className={classes.time}>9:46 PM</div>
-            </div>
           </div>
-          <div className={classes.typeMessageSection}>
-            <div className={classes.typeMessageFirstPart}>
-              <input
-                placeholder="Type a message..."
-                className={classes.sendMessage}
-              ></input>
-              <InsertEmoticonIcon />
-              <PhotoIcon />
+          <div>
+            <div
+              style={{ display: "flex", marginLeft: "15px", flexWrap: "wrap" }}
+            >
+              {!loading ? (
+                allPics.map(({ id, url }) => (
+                  <div className={classes.selectedPicContainer} key={id}>
+                    <img src={url} className={classes.selectedPic} />
+                    <DeleteIcon
+                      className={classes.deleteIcon}
+                      onClick={() => deletePicHandler(id)}
+                    />
+                  </div>
+                ))
+              ) : (
+                <div
+                  style={{
+                    height: "100px",
+                    width: "100%",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center"
+                  }}
+                >
+                  <CircularProgress color="secondary" />
+                </div>
+              )}
             </div>
-            <SendIcon style={{ marginLeft: "5px" }} />
+            <div className={classes.typeMessageSection}>
+              <div className={classes.typeMessageFirstPart}>
+                <input
+                  placeholder="Type a message..."
+                  className={classes.sendMessage}
+                  onChange={typeMessageHandler}
+                  value={message}
+                ></input>
+                <InsertEmoticonIcon onClick={handleEmojiOpen} />
+                <Popover
+                  id={id}
+                  open={open}
+                  anchorEl={anchorEmoji}
+                  onClose={handleEmojiClose}
+                  anchorOrigin={{
+                    vertical: "top",
+                    horizontal: "center"
+                  }}
+                  transformOrigin={{
+                    vertical: "bottom",
+                    horizontal: "center"
+                  }}
+                >
+                  <Picker onEmojiClick={onEmojiClick} />
+                </Popover>
+                <input
+                  id="outlined-button-file"
+                  type="file"
+                  multiple
+                  style={{ display: "none" }}
+                  onChange={picUploadHandler}
+                />
+                <label htmlFor="outlined-button-file">
+                  <PhotoIcon />
+                </label>
+              </div>
+              <SendIcon style={{ marginLeft: "5px" }} onClick={sendPic} />
+            </div>
           </div>
         </div>
       </main>

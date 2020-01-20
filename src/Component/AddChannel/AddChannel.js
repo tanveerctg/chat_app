@@ -1,16 +1,14 @@
-import React, { useEffect, useState } from "react";
-import Typography from "@material-ui/core/Typography";
+import React, { useState } from "react";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import Dialog from "@material-ui/core/Dialog";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
+import { makeStyles } from "@material-ui/core/styles";
 import AddCircleOutlineIcon from "@material-ui/icons/AddCircleOutline";
-import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 import Divider from "@material-ui/core/Divider";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import { ValidatorForm, TextValidator } from "react-material-ui-form-validator";
 import { ADD_NEWCHANNEL } from "../../Reducer/Channel";
 import { store } from "../../index";
@@ -18,7 +16,6 @@ import { firebase } from "../../firebase";
 import uuidv4 from "uuid/v4";
 import moment from "moment";
 
-console.log(moment().valueOf());
 const useStyles = makeStyles(theme => ({
   form: {
     display: "flex",
@@ -65,7 +62,7 @@ function SimpleDialog(props) {
   const [channelName, setChannelName] = useState("");
   const [channelInfo, setChannelInfo] = useState("");
   const { credentialReducer, Loading } = useSelector(state => state);
-  const [error, setError] = useState(false);
+  const [error] = useState(false);
   const channelDatabaseRef = firebase.database().ref("Channels");
   const { onClose, open } = props;
   const classes = useStyles();
@@ -84,9 +81,10 @@ function SimpleDialog(props) {
           name: channelName,
           info: channelInfo,
           createdTime: moment().valueOf(),
-          createdBy: credentialReducer
+          createdBy: credentialReducer,
+          publicChannel: true
         };
-        console.log(info);
+
         store.dispatch({ type: ADD_NEWCHANNEL, channelInfo: info });
         channelDatabaseRef
           .child(credentialReducer.id)
@@ -100,13 +98,9 @@ function SimpleDialog(props) {
       }
     }
     onClose();
-
     e.preventDefault();
   };
 
-  // useEffect(() => {
-  //   console.log("ran useefeect");
-  // }, Loading);
   return (
     <Dialog
       onClose={handleClose}

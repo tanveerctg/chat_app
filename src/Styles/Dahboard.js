@@ -54,6 +54,7 @@ const useStyles = makeStyles(theme => ({
     }
   },
   eachMesssage: {
+    positione: "relative",
     display: "flex",
     alignItems: "center",
     margin: "15px 0",
@@ -76,7 +77,8 @@ const useStyles = makeStyles(theme => ({
   typeMessageSection: {
     width: "85%",
     position: "relative",
-    margin: "0px auto 10px  auto",
+    marginLeft: "15px",
+    marginBottom: "10px",
     display: "flex",
     alignItems: "center",
     "@media (max-width:500px)": {
@@ -97,7 +99,46 @@ const useStyles = makeStyles(theme => ({
     padding: "15px",
     border: "none",
     background: "#EEEEEE",
-    borderRadius: "5px"
+    borderRadius: "5px",
+    "&:focus": {
+      outline: "none"
+    },
+    emojiIcon: {
+      position: "relative"
+    }
+  },
+  selectedPic: {
+    width: "100%",
+    height: "100%",
+    borderRadius: "5px",
+    cursor: "pointer",
+    objectFit: "conatin",
+    objectPosition: "center"
+  },
+  selectedPicContainer: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    position: "relative",
+    width: "150px",
+    height: "100px",
+    marginLeft: "10px",
+    marginBottom: "7px",
+    "&:hover svg": {
+      opacity: 1,
+      zIndex: 10
+    }
+  },
+  deleteIcon: {
+    position: "absolute",
+    right: "5px",
+    color: "white",
+    opacity: 0,
+    backgroundColor: "red",
+    borderRadius: "50%",
+    padding: "3px",
+    top: "3px",
+    cursor: "pointer"
   }
 }));
 

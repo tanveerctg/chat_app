@@ -1,5 +1,5 @@
 import firebase from "firebase";
-console.log(firebase);
+
 var firebaseConfig = {
   apiKey: "AIzaSyC031Zo3446lFsnBbStGpz_Zooczuf9wQw",
   authDomain: "chatapp-d2a95.firebaseapp.com",

@@ -18,7 +18,23 @@ import { firebase } from "../src/firebase";
 import { connect } from "react-redux";
 import Loading from "./Component/Loading/Loading";
 import { store } from "../src/index";
-import { SET_INITIAL_CHANNEL } from "../src/Reducer/Channel";
+import { SET_INITIAL_CHANNEL, CLICKED_CHANNEL } from "../src/Reducer/Channel";
+
+firebase
+  .database()
+  .ref("Channels")
+  .once("value", function(snap) {
+    // console.log("SNAPP", snap.numChildren());
+    for (let child in snap.val()) {
+      firebase
+        .database()
+        .ref(`Channels/${child}`)
+        .once("value", function(snap) {
+          console.log("SNAPP", snap.numChildren());
+        });
+    }
+  });
+
 function App(props) {
   useEffect(() => {
     firebase.auth().onAuthStateChanged(function(user) {
@@ -51,15 +67,23 @@ function App(props) {
             return allChannels;
           })
           .then(res => {
-            console.log(res);
             store.dispatch({
               type: SET_INITIAL_CHANNEL,
               allChannels: [...res]
+            });
+
+            store.dispatch({
+              type: CLICKED_CHANNEL,
+              channel: store.getState().Channel.channels[0]
             });
           });
       } else {
         // User is signed out.
         // ...
+        //Clear user info from Redux
+        store.dispatch({
+          type: LOG_OUT
+        });
         console.log("signout");
       }
     });
@@ -80,10 +104,5 @@ const mapStateToProps = state => {
     loading: state.Loading
   };
 };
-// const mapDispatchToProps = dispatch => {
-//   return {
-//     id: state.credentialReducer.id
-//   };
-// };
 
 export default connect(mapStateToProps)(App);

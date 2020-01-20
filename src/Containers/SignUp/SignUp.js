@@ -104,13 +104,11 @@ function Login(props) {
       err.push("Password should be atleast 6 character.");
       setError(err);
       return false;
-      console.log("1st");
     } else if (password !== confirmPassword) {
       setError([]);
       err.push("Password mismatch.");
       setError(err);
       return false;
-      console.log("2nd");
     } else {
       return true;
     }
@@ -141,7 +139,6 @@ function Login(props) {
         .then(res => {
           // res.user.providerData[0].displayName = userName;
 
-          console.log(res.user.uid);
           const name = userName;
           const pass = password;
           const id = res.user.uid;
@@ -150,7 +147,7 @@ function Login(props) {
           props.dispatch({
             type: LOADING_OFF
           });
-          console.log({ name, pass, id, avatarUrl });
+
           history.push("/");
         })
         .catch(function(error) {
