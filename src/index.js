@@ -7,20 +7,20 @@ import * as serviceWorker from "./serviceWorker";
 import { createStore, applyMiddleware, compose, combineReducers } from "redux";
 import thunk from "redux-thunk";
 import { Provider } from "react-redux";
-import { credentialReducer, LOG_IN, LOG_OUT } from "./Reducer/Credential";
-import {
-  LOADING_ON,
-  LOADING_OFF,
-  LoadingReducer
-} from "./Reducer/LoadingReducer";
+import { credentialReducer } from "./Reducer/Credential";
+import { LoadingReducer } from "./Reducer/LoadingReducer";
 import { Channel } from "./Reducer/Channel";
+import { Messages } from "./Reducer/Messages";
+import { FilterMessage, FILTER_MESSAGE } from "./Reducer/FilterMessage";
 
 const composeEnhancer = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
 const rootReducer = {
   credentialReducer: credentialReducer,
   Loading: LoadingReducer,
-  Channel: Channel
+  Channel: Channel,
+  Messages: Messages,
+  FilterMessage: FilterMessage
 };
 export const store = createStore(
   combineReducers(rootReducer),

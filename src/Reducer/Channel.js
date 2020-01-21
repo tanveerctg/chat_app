@@ -12,23 +12,27 @@ const Channel = (state = initialState, action) => {
   switch (action.type) {
     case ADD_NEWCHANNEL: {
       return {
+        ...state,
         channels: [...state.channels, action.channelInfo]
       };
     }
     case SET_INITIAL_CHANNEL: {
       return {
-        channels: action.allChannels
+        ...state,
+        channels: action.allChannels,
+        clickedChannel: action.clickedChannel
       };
     }
     case CLEAR_CHANNELS: {
       return {
+        ...state,
         channels: []
       };
     }
     case CLICKED_CHANNEL: {
       return {
         ...state,
-        CLICKED_CHANNEL: action.channel
+        clickedChannel: action.channel
       };
     }
     default:

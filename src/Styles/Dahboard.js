@@ -44,6 +44,9 @@ const useStyles = makeStyles(theme => ({
     width: "400px",
     "@media (max-width:450px)": {
       width: "95%"
+    },
+    "&:focus": {
+      outline: "none"
     }
   },
   bodyContent: {
@@ -56,23 +59,30 @@ const useStyles = makeStyles(theme => ({
   eachMesssage: {
     positione: "relative",
     display: "flex",
-    alignItems: "center",
+    flexDirection: "column",
     margin: "15px 0",
-    "& > *": {
-      marginRight: "10px"
+    "&:nth-child(2)": {
+      fontSize: "13px",
+      color: "red"
     }
   },
   message: {
     padding: "10px 15px",
     background: "#EEEEEE",
-    borderRadius: "20px"
+    borderRadius: "20px",
+    color: "black",
+    fontSize: "15px"
   },
   time: {
     fontSize: "13px",
-    color: "#5E5E5E"
+    color: "#5E5E5E",
+    alignSelf: "center",
+    marginBottom: "10px"
   },
   messagePic: {
-    maxWidth: "400px"
+    width: "100%",
+    height: "100%",
+    objectFit: "contain"
   },
   typeMessageSection: {
     width: "85%",
@@ -106,6 +116,12 @@ const useStyles = makeStyles(theme => ({
     emojiIcon: {
       position: "relative"
     }
+  },
+  avatar_message: {
+    display: "flex"
+  },
+  avatar: {
+    marginRight: "10px"
   },
   selectedPic: {
     width: "100%",

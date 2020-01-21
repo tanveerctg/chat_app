@@ -14,7 +14,6 @@ import Avatar from "@material-ui/core/Avatar";
 import InsertEmoticonIcon from "@material-ui/icons/InsertEmoticon";
 import PhotoIcon from "@material-ui/icons/Photo";
 import SendIcon from "@material-ui/icons/Send";
-import pizza from "./pizza.png";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 import Badge from "@material-ui/core/Badge";
@@ -29,6 +28,10 @@ import Popover from "@material-ui/core/Popover";
 import DeleteIcon from "@material-ui/icons/Delete";
 import uuidv4 from "uuid/v4";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import moment from "moment";
+import AllMessages from "../../Component/AllMessages/AllMessages";
+import SearchMessage from "../../Component/SearchMessage/SearchMessage";
+
 //CSS
 import useStyles from "../../Styles/Dahboard";
 
@@ -76,6 +79,8 @@ function ResponsiveDrawer(props) {
   const [picUrl, setPicUrl] = useState(null);
   const [allPics, setAllPics] = useState([]);
   const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
+  const MessagesRef = firebase.database().ref("Messages");
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -110,6 +115,7 @@ function ResponsiveDrawer(props) {
     setChosenEmoji(chosenEmoji.push(emojiObject));
     let joinAllEmoji = chosenEmoji.map(emoji => emoji.emoji).join("");
     setMessage(`${message}${joinAllEmoji}`);
+    setChosenEmoji([]);
   };
 
   //TYPE_MESSAGE_HANDLER
@@ -121,17 +127,14 @@ function ResponsiveDrawer(props) {
     firebase
       .auth()
       .signOut()
-      .then(function() {
-        props.history.push("/login");
-      })
+      .then(function() {})
       .catch(function(error) {
         // An error happened.
       });
-    console.log("Sign Out");
   };
   const picUploadHandler = e => {
     // setPicUpload(e.target.files[0]);
-    const path = Channel.CLICKED_CHANNEL.publicChannel ? "public" : "private";
+    const path = Channel.clickedChannel.publicChannel ? "public" : "private";
     const uuid = uuidv4() + path;
     setLoading(true);
     if (path) {
@@ -166,17 +169,6 @@ function ResponsiveDrawer(props) {
     // console.log(mime.getType(e.target.files[0].name));
   };
   const deletePicHandler = id => {
-    // var desertRef = storageRef.child("images/desert.jpg");
-
-    // // Delete the file
-    // desertRef
-    //   .delete()
-    //   .then(function() {
-    //     // File deleted successfully
-    //   })
-    //   .catch(function(error) {
-    //     // Uh-oh, an error occurred!
-    //   });
     setAllPics(allPics.filter(elm => elm.id !== id));
     const str = id;
     const regex = RegExp("public", "gi");
@@ -189,7 +181,6 @@ function ResponsiveDrawer(props) {
         .catch(function(error) {
           // Uh-oh, an error occurred!
         });
-      console.log("public");
     } else {
       firebase
         .storage()
@@ -201,31 +192,30 @@ function ResponsiveDrawer(props) {
         });
     }
   };
-  const sendPic = () => {
-    const path = Channel.CLICKED_CHANNEL.publicChannel ? "public" : "private";
-    const uuid = uuidv4() + path;
-    console.log(picUpload, path);
-    firebase
-      .storage()
-      .ref(`${path}/${uuid}`)
-      .put(picUpload)
-      .on(
-        "state_changed",
-        snapshot => {},
-        e => {
-          console.log(e);
-        },
-        () => {
-          firebase
-            .storage()
-            .ref(`${path}/${uuid}`)
-            .getDownloadURL()
-            .then(name => {
-              setPicUrl(name);
-              console.log("url", name);
-            });
-        }
-      );
+  const sendMessage = () => {
+    let messages = {
+      text: message,
+      imgs: allPics
+    };
+    const channelId = Channel.clickedChannel.id;
+    const createdBy = credentialReducer;
+    const messageKey = uuidv4();
+    const createdTime = moment().valueOf();
+    const data = {
+      messages,
+      createdBy,
+      messageKey,
+      channelId,
+      createdTime
+    };
+
+    MessagesRef.child(channelId)
+      .child(messageKey)
+      .set(data);
+
+    dispatch({ type: "ADD_MESSAGE", data: data });
+    setMessage([]);
+    setAllPics([]);
   };
   const drawer = (
     <div>
@@ -365,58 +355,8 @@ function ResponsiveDrawer(props) {
             height: "100%"
           }}
         >
-          <input
-            placeholder="Search Message..."
-            className={classes.searchMessage}
-          ></input>
-
-          <div className={classes.bodyContent}>
-            <div className={classes.eachMesssage}>
-              <Avatar className={classes.orange}>N</Avatar>
-              <div className={classes.message}>Pizza is Very Tasty</div>
-              <div className={classes.time}>9:46 PM</div>
-            </div>
-            <div className={classes.eachMesssage}>
-              <Avatar className={classes.orange}>N</Avatar>
-              <div className={classes.message}>Pizza is Very Tasty</div>
-              <div className={classes.time}>9:46 PM</div>
-            </div>
-            <div className={classes.eachMesssage}>
-              <Avatar className={classes.orange}>N</Avatar>
-              <img src={pizza} className={classes.messagePic} />
-              <div className={classes.time}>9:46 PM</div>
-            </div>
-            <div className={classes.eachMesssage}>
-              <Avatar className={classes.orange}>N</Avatar>
-              <div className={classes.message}>Pizza is Very Tasty</div>
-              <div className={classes.time}>9:46 PM</div>
-            </div>
-            <div className={classes.eachMesssage}>
-              <Avatar className={classes.orange}>N</Avatar>
-              <div className={classes.message}>Pizza is Very Tasty</div>
-              <div className={classes.time}>9:46 PM</div>
-            </div>
-            <div className={classes.eachMesssage}>
-              <Avatar className={classes.orange}>N</Avatar>
-              <div className={classes.message}>Pizza is Very Tasty</div>
-              <div className={classes.time}>9:46 PM</div>
-            </div>
-            <div className={classes.eachMesssage}>
-              <Avatar className={classes.orange}>N</Avatar>
-              <div className={classes.message}>Pizza is Very Tasty</div>
-              <div className={classes.time}>9:46 PM</div>
-            </div>
-            <div className={classes.eachMesssage}>
-              <Avatar className={classes.orange}>N</Avatar>
-              <div className={classes.message}>Pizza is Very Tasty</div>
-              <div className={classes.time}>9:46 PM</div>
-            </div>
-            <div className={classes.eachMesssage}>
-              <Avatar className={classes.orange}>N</Avatar>
-              <div className={classes.message}>Pizza is Very Tasty</div>
-              <div className={classes.time}>9:46 PM</div>
-            </div>
-          </div>
+          <SearchMessage />
+          <AllMessages />
           <div>
             <div
               style={{ display: "flex", marginLeft: "15px", flexWrap: "wrap" }}
@@ -452,6 +392,7 @@ function ResponsiveDrawer(props) {
                   className={classes.sendMessage}
                   onChange={typeMessageHandler}
                   value={message}
+                  style={{ fontSize: "16px" }}
                 ></input>
                 <InsertEmoticonIcon onClick={handleEmojiOpen} />
                 <Popover
@@ -481,7 +422,12 @@ function ResponsiveDrawer(props) {
                   <PhotoIcon />
                 </label>
               </div>
-              <SendIcon style={{ marginLeft: "5px" }} onClick={sendPic} />
+              {!loading && (message.length > 0 || allPics.length > 0) && (
+                <SendIcon
+                  style={{ marginLeft: "5px", cursor: "pointer" }}
+                  onClick={sendMessage}
+                />
+              )}
             </div>
           </div>
         </div>

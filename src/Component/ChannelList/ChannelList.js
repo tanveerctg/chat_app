@@ -5,21 +5,22 @@ import ListItemText from "@material-ui/core/ListItemText";
 import { CLICKED_CHANNEL } from "../../Reducer/Channel";
 
 export default function ChannelList() {
-  const { credentialReducer, Loading, Channel } = useSelector(state => state);
+  const { Channel } = useSelector(state => state);
   const [clickedItem, setClickedItem] = useState(0);
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    dispatch({
-      type: CLICKED_CHANNEL,
-      channel: Channel.channels[clickedItem]
-    });
-  }, [clickedItem]);
   return Channel.channels.map((channel, index) => {
     return (
       <ListItem
         button
-        onClick={() => setClickedItem(index)}
+        onClick={() => {
+          setClickedItem(index);
+          dispatch({
+            type: CLICKED_CHANNEL,
+            channel: Channel.channels[index],
+            clickedChannelID: Channel.channels[index].id
+          });
+        }}
         selected={index === clickedItem}
         key={index}
       >

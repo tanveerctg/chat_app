@@ -87,18 +87,12 @@ function Login(props) {
       console.log("NOT OK");
     } else {
       setError([]);
-      props.dispatch({
-        type: LOADING_ON
-      });
+
       firebase
         .auth()
         .signInWithEmailAndPassword(email, password)
         .then(res => {
-          props.dispatch({
-            type: LOADING_OFF
-          });
           props.dispatch({ type: CLEAR_CHANNELS });
-          history.push("/");
         })
         .catch(function(error) {
           // Handle Errors here.

@@ -130,9 +130,7 @@ function Login(props) {
     const err = [];
     if (isFormValid()) {
       setError([]);
-      props.dispatch({
-        type: LOADING_ON
-      });
+
       firebase
         .auth()
         .createUserWithEmailAndPassword(email, password)
@@ -144,11 +142,6 @@ function Login(props) {
           const id = res.user.uid;
           const avatarUrl = `https://ui-avatars.com/api/?name=${name}`;
           userDatabaseRef.child(id).update({ name, pass, id, avatarUrl });
-          props.dispatch({
-            type: LOADING_OFF
-          });
-
-          history.push("/");
         })
         .catch(function(error) {
           // Handle Errors here.
