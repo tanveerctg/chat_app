@@ -1,5 +1,4 @@
 function getFilter(messages, searchTxt = null) {
-  console.log("MESSAGES", messages);
   let filtered = messages.filter(msg => {
     var patt = new RegExp(searchTxt, "gi");
     let txt;

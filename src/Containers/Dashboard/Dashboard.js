@@ -21,6 +21,7 @@ import { withStyles } from "@material-ui/core/styles";
 import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import AddChannel from "../../Component/AddChannel/AddChannel";
 import ChannelList from "../../Component/ChannelList/ChannelList";
+import DirectMessaging from "../../Component/DirectMessaging/DirectMessaging";
 import { useSelector, useDispatch } from "react-redux";
 import { firebase } from "../../firebase";
 import Picker from "emoji-picker-react";
@@ -31,6 +32,8 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import moment from "moment";
 import AllMessages from "../../Component/AllMessages/AllMessages";
 import SearchMessage from "../../Component/SearchMessage/SearchMessage";
+import SetPublicMessages from "../../Functions/SetPublicMessages";
+import SetPrivateMessages from "../../Functions/SetPrivateMessages";
 
 //CSS
 import useStyles from "../../Styles/Dahboard";
@@ -69,7 +72,10 @@ function ResponsiveDrawer(props) {
   const classes = useStyles();
   const theme = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { credentialReducer, Loading, Channel } = useSelector(state => state);
+  const { credentialReducer, Loading, Channel, Messages } = useSelector(
+    state => state
+  );
+
   const [chosenEmoji, setChosenEmoji] = useState([]);
   const [allEmoji, setAllEmoji] = useState([]);
   const [message, setMessage] = useState("");
@@ -80,6 +86,7 @@ function ResponsiveDrawer(props) {
   const [allPics, setAllPics] = useState([]);
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
+  const NotificationsRef = firebase.database().ref("Notifications");
   const MessagesRef = firebase.database().ref("Messages");
 
   const handleDrawerToggle = () => {
@@ -197,23 +204,15 @@ function ResponsiveDrawer(props) {
       text: message,
       imgs: allPics
     };
-    const channelId = Channel.clickedChannel.id;
-    const createdBy = credentialReducer;
-    const messageKey = uuidv4();
-    const createdTime = moment().valueOf();
-    const data = {
-      messages,
-      createdBy,
-      messageKey,
-      channelId,
-      createdTime
-    };
 
-    MessagesRef.child(channelId)
-      .child(messageKey)
-      .set(data);
+    if (Channel.isPrivateChannel) {
+      // SET PRIVATE MESSAGES && NOTIFICATIONS
+      SetPrivateMessages(Channel.clickedChannel, credentialReducer, messages);
+    } else {
+      // SET PUBLIC MESSAGES && NOTIFICATIONS
+      SetPublicMessages(Channel, credentialReducer, messages);
+    }
 
-    dispatch({ type: "ADD_MESSAGE", data: data });
     setMessage([]);
     setAllPics([]);
   };
@@ -272,6 +271,7 @@ function ResponsiveDrawer(props) {
       <List>
         <AddChannel />
         <ChannelList />
+        <DirectMessaging />
       </List>
     </div>
   );
@@ -356,7 +356,7 @@ function ResponsiveDrawer(props) {
           }}
         >
           <SearchMessage />
-          <AllMessages />
+          <AllMessages Messages={Messages} />
           <div>
             <div
               style={{ display: "flex", marginLeft: "15px", flexWrap: "wrap" }}
@@ -419,7 +419,9 @@ function ResponsiveDrawer(props) {
                   onChange={picUploadHandler}
                 />
                 <label htmlFor="outlined-button-file">
-                  <PhotoIcon />
+                  <PhotoIcon
+                    style={{ marginRight: "5px", marginTop: "3.5px" }}
+                  />
                 </label>
               </div>
               {!loading && (message.length > 0 || allPics.length > 0) && (

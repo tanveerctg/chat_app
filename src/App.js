@@ -18,98 +18,85 @@ import { firebase } from "../src/firebase";
 import { connect } from "react-redux";
 import Loading from "./Component/Loading/Loading";
 import { store } from "../src/index";
-import { SET_INITIAL_CHANNEL, CLICKED_CHANNEL } from "../src/Reducer/Channel";
+import { SET_INITIAL_NOTIFICATIONS } from "./Reducer/Notifications";
+import { SET_INITIAL_CHANNEL } from "../src/Reducer/Channel";
 import { SET_INITIAL_MESSAGES } from "./Reducer/Messages";
-// import { LOG_IN, LOG_OUT } from "./Reducer/Credential";
-
-// firebase
-//   .database()
-//   .ref("Channels")
-//   .once("value", function(snap) {
-//     // console.log("SNAPP", snap.numChildren());
-//     for (let child in snap.val()) {
-//       firebase
-//         .database()
-//         .ref(`Channels/${child}`)s
-//         .once("value", function(snap) {
-//           console.log("SNAPP", snap.numChildren());
-//         });
-//     }
-//   });
+import { useSelector, useDispatch } from "react-redux";
+//ALL HELPER FUNCTIONS
+import FetchUsers from "./Functions/FetchUsers";
+import FetchChannels from "./Functions/FetchChannels";
+import FetchChannelMessages from "./Functions/FetchChannelMessages";
+import FetchOtherUsersInfo from "./Functions/FetchOtherUsersInfo";
 
 function App(props) {
-  let history = useHistory();
+  const history = useHistory();
+  const { Notifications, credentialReducer } = useSelector(state => state);
+  const NotificationsRef = firebase.database().ref("Notifications");
+
+  firebase
+    .database()
+    .ref(".info/connected")
+    .on("value", function(snap) {
+      if (snap.val()) {
+        if (credentialReducer.id) {
+          const ref = firebase
+            .database()
+            .ref("online")
+            .child(credentialReducer.id);
+          ref.set(true);
+          ref.onDisconnect().remove(err => {
+            if (err !== null) {
+              console.log(err);
+            }
+          });
+        }
+      } else {
+        if (credentialReducer.id) {
+          const ref = firebase
+            .database()
+            .ref("online")
+            .child(credentialReducer.id);
+          ref.onDisconnect().remove(err => {
+            if (err !== null) {
+              console.log(err);
+            }
+          });
+        }
+      }
+    });
 
   useEffect(() => {
     firebase.auth().onAuthStateChanged(function(user) {
       if (user) {
         history.push("/");
-        store.dispatch({ type: LOADING_ON });
-        firebase
-          .database()
-          .ref(`Users/${user.uid}`)
-          .once("value")
-          .then(snapshot => {
-            const { name, avatarUrl, id } = snapshot.val();
-            store.dispatch({
-              type: LOG_IN,
-              id: id,
-              userName: name,
-              avatarUrl: avatarUrl
-            });
-          });
-        firebase
-          .database()
-          .ref("Channels")
-          .once("value")
-          .then(function(snapshot) {
-            let allChannels = [];
-            for (let k in snapshot.val()) {
-              for (let d in snapshot.val()[k]) {
-                allChannels.push(snapshot.val()[k][d]);
-              }
-            }
-            return allChannels;
-          })
-          .then(res => {
-            // console.log("RES", res);
-            store.dispatch({
-              type: SET_INITIAL_CHANNEL,
-              allChannels: [...res],
-              clickedChannel: [...res][0]
-            });
-
-            // store.dispatch({
-            //   type: CLICKED_CHANNEL,
-            //   channel: store.getState().Channel.channels[0]
-            // });
-            store.dispatch({ type: LOADING_OFF });
-          });
-
-        let messages = {};
-        firebase
-          .database()
-          .ref("Messages")
-          .once("value")
-          .then(snapshot => {
-            // console.log("MESSAGESS", snapshot.val());
-            for (let channelId in snapshot.val()) {
-              messages[channelId] = [];
-              for (let msgKey in snapshot.val()[channelId]) {
-                messages[channelId].push(snapshot.val()[channelId][msgKey]);
-              }
-            }
-            return messages;
-          })
-          .then(messages => {
-            store.dispatch({ type: SET_INITIAL_MESSAGES, messages: messages });
-            store.dispatch({ type: LOADING_OFF });
-          });
+        //LOG In
         store.dispatch({ type: LOG_IN });
+        store.dispatch({ type: LOADING_ON });
+
+        //FETCH OTHER USERS INFO
+        FetchOtherUsersInfo(user);
+
+        // Fetch out all info of the USER
+        FetchUsers(user);
+
+        // Fetch out all Channels info
+        FetchChannels(user);
+
+        // Fetch Out Messages of All Channels
+        FetchChannelMessages(user);
+
+        //SET NOTIFICATIONS TO REDUX
+        NotificationsRef.child(user.uid).on("value", snap => {
+          store.dispatch({
+            type: SET_INITIAL_NOTIFICATIONS,
+            notifications: snap.val()
+          });
+        });
       } else {
         // User is signed out.
         // ...
         //Clear user info from Redux
+
         history.push("/login");
         store.dispatch({
           type: LOG_OUT

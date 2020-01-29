@@ -11,7 +11,9 @@ import { credentialReducer } from "./Reducer/Credential";
 import { LoadingReducer } from "./Reducer/LoadingReducer";
 import { Channel } from "./Reducer/Channel";
 import { Messages } from "./Reducer/Messages";
+import { Users } from "./Reducer/Users";
 import { FilterMessage, FILTER_MESSAGE } from "./Reducer/FilterMessage";
+import { Notifications } from "./Reducer/Notifications";
 
 const composeEnhancer = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
@@ -20,7 +22,9 @@ const rootReducer = {
   Loading: LoadingReducer,
   Channel: Channel,
   Messages: Messages,
-  FilterMessage: FilterMessage
+  FilterMessage: FilterMessage,
+  Notifications: Notifications,
+  Users: Users
 };
 export const store = createStore(
   combineReducers(rootReducer),

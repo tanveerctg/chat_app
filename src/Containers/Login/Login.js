@@ -11,6 +11,7 @@ import { LOADING_ON, LOADING_OFF } from "../../Reducer/LoadingReducer";
 import { connect } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { CLEAR_CHANNELS } from "../../Reducer/Channel";
+import Alert from "@material-ui/lab/Alert";
 
 const useStyles = makeStyles(theme => ({
   wrapper: {
@@ -114,6 +115,9 @@ function Login(props) {
     }
     return value;
   };
+  const goToSignup = () => {
+    history.push("/signup");
+  };
 
   return (
     <div className={classes.wrapper}>
@@ -156,12 +160,24 @@ function Login(props) {
           <div style={{ lineHeight: "15px" }}>&nbsp;</div>
           <p>
             Don't have an account?{" "}
-            <span style={{ color: "blue", textDecoration: "underline" }}>
+            <span
+              style={{
+                color: "blue",
+                textDecoration: "underline",
+                cursor: "pointer"
+              }}
+              onClick={goToSignup}
+            >
               Sign Up
             </span>
           </p>
           <div style={{ lineHeight: "15px" }}>&nbsp;</div>
         </form>
+        {error.length > 0 && (
+          <Alert severity="error" style={{ justifyContent: "center" }}>
+            {error[0]}
+          </Alert>
+        )}
       </div>
     </div>
   );

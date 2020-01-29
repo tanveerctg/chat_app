@@ -7,24 +7,20 @@ import filterText from "../../filterText";
 //CSS
 import useStyles from "../../Styles/Dahboard";
 
-function AllMessages({ channelId }) {
+function AllMessages({ Messages }) {
   const classes = useStyles();
-  const { Messages, Channel, FilterMessage } = useSelector(state => state);
+  const { Channel, FilterMessage, credentialReducer } = useSelector(
+    state => state
+  );
   const [channelMessage, setChannelMessage] = useState([]);
 
   let { id, createdBy } = { ...Channel.clickedChannel };
 
+  // let channelMessage = Messages[id];
   useEffect(() => {
     setChannelMessage(Messages[id]);
-  }, Messages[id]);
-  useMemo(
-    () => () => {
-      setChannelMessage(
-        Messages[id].sort((a, b) => b.createdTime - a.createdTime)
-      );
-    },
-    Messages[id]
-  );
+  });
+
   let filteredMessages;
   if (channelMessage) {
     filteredMessages = filterText(
@@ -60,7 +56,15 @@ function AllMessages({ channelId }) {
                     <div
                       className={classes.message}
                       style={{
-                        marginBottom: `${msg.messages.imgs ? 10 : 0}px`
+                        marginBottom: `${msg.messages.imgs ? 10 : 0}px`,
+                        color:
+                          credentialReducer.id == msg.createdBy.id
+                            ? "white"
+                            : "#333333",
+                        backgroundColor:
+                          credentialReducer.id == msg.createdBy.id
+                            ? "#0084ff"
+                            : "#EEEEEE"
                       }}
                     >
                       {msg.messages.text}
@@ -95,17 +99,4 @@ function AllMessages({ channelId }) {
     </div>
   );
 }
-export default React.memo(AllMessages);
-
-//  <div className={classes.eachMesssage}>
-//     <div className={classes.time}>9:46 PM</div>
-//     <div className={classes.avatar_message} >
-//       <Avatar className={classes.avatar}>N</Avatar>
-//        <div className={classes.message}>Jlasfd</div>
-//       <div style={{display:"grid",gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",gridGap:"10px"}}>
-//       <img src={pizza} className={classes.messagePic} />
-//       <img src={pizza} className={classes.messagePic} />
-//        <img src={pizza} className={classes.messagePic} />
-//       </div>
-
-//     </div>
+export default AllMessages;

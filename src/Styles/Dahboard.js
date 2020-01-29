@@ -67,9 +67,8 @@ const useStyles = makeStyles(theme => ({
     }
   },
   message: {
-    padding: "10px 15px",
-    background: "#EEEEEE",
-    borderRadius: "20px",
+    padding: "5px 10px",
+    borderRadius: "15px",
     color: "black",
     fontSize: "15px"
   },

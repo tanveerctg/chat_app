@@ -11,6 +11,7 @@ import { connect } from "react-redux";
 import { credentialReducer, LOG_IN, LOG_OUT } from "../../Reducer/Credential";
 import { LOADING_ON, LOADING_OFF } from "../../Reducer/LoadingReducer";
 import { useHistory } from "react-router-dom";
+import Alert from "@material-ui/lab/Alert";
 
 const useStyles = makeStyles(theme => ({
   wrapper: {
@@ -70,6 +71,7 @@ function Login(props) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState([]);
   const userDatabaseRef = firebase.database().ref("Users");
+  const NotificationsRef = firebase.database().ref("Notifications");
   let history = useHistory();
 
   const handleUserName = e => {
@@ -142,6 +144,10 @@ function Login(props) {
           const id = res.user.uid;
           const avatarUrl = `https://ui-avatars.com/api/?name=${name}`;
           userDatabaseRef.child(id).update({ name, pass, id, avatarUrl });
+          NotificationsRef.child(id).set("");
+        })
+        .then(res => {
+          console.log(res);
         })
         .catch(function(error) {
           // Handle Errors here.
@@ -151,12 +157,13 @@ function Login(props) {
           setError(err);
           // ...
         });
-      console.log("ok");
     } else {
       console.log("not ok");
     }
   };
-
+  const goToLogin = () => {
+    history.push("/login");
+  };
   return (
     <div className={classes.wrapper}>
       <div className={classes.container}>
@@ -229,12 +236,24 @@ function Login(props) {
           <div style={{ lineHeight: "15px" }}>&nbsp;</div>
           <p>
             Already have an account?{" "}
-            <span style={{ color: "blue", textDecoration: "underline" }}>
+            <span
+              style={{
+                color: "blue",
+                textDecoration: "underline",
+                cursor: "pointer"
+              }}
+              onClick={goToLogin}
+            >
               Log in
             </span>
           </p>
           <div style={{ lineHeight: "15px" }}>&nbsp;</div>
         </form>
+        {error.length > 0 && (
+          <Alert severity="error" style={{ justifyContent: "center" }}>
+            {error[0]}
+          </Alert>
+        )}
       </div>
     </div>
   );
@@ -243,10 +262,5 @@ function Login(props) {
 const mapStateToProps = state => {
   console.log("state", state);
 };
-// const mapDispatchToProps = dispatch => {
-//   return {
-//     login: dispatch({ type: LOG_IN, id, userName, avatarUrl })
-//   };
-// };
 
 export default connect(mapStateToProps)(Login);

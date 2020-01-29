@@ -94,6 +94,7 @@ function SimpleDialog(props) {
             setChannelName("");
             setChannelInfo("");
           });
+        // firebase.database().ref("Notifications").;
         onClose();
       }
     }

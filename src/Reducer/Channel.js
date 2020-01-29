@@ -5,7 +5,8 @@ const CLICKED_CHANNEL = "CLICKED_CHANNEL";
 
 const initialState = {
   channels: [],
-  clickedChannel: null
+  clickedChannel: null,
+  isPrivateChannel: false
 };
 
 const Channel = (state = initialState, action) => {
@@ -32,6 +33,7 @@ const Channel = (state = initialState, action) => {
     case CLICKED_CHANNEL: {
       return {
         ...state,
+        isPrivateChannel: action.isPrivateChannel,
         clickedChannel: action.channel
       };
     }
