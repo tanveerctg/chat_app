@@ -27,6 +27,7 @@ import FetchUsers from "./Functions/FetchUsers";
 import FetchChannels from "./Functions/FetchChannels";
 import FetchChannelMessages from "./Functions/FetchChannelMessages";
 import FetchOtherUsersInfo from "./Functions/FetchOtherUsersInfo";
+import FetchPrivateMessages from "./Functions/FetchPrivateMessages";
 
 function App(props) {
   const history = useHistory();
@@ -72,6 +73,9 @@ function App(props) {
         //LOG In
         store.dispatch({ type: LOG_IN });
         store.dispatch({ type: LOADING_ON });
+
+        // FETCH PRIVATE MESSAGES AND NOTIFICATIONS AND THEN SET THEM TO REDUX
+        FetchPrivateMessages(user);
 
         //FETCH OTHER USERS INFO
         FetchOtherUsersInfo(user);

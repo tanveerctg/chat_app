@@ -14,6 +14,7 @@ import { Messages } from "./Reducer/Messages";
 import { Users } from "./Reducer/Users";
 import { FilterMessage, FILTER_MESSAGE } from "./Reducer/FilterMessage";
 import { Notifications } from "./Reducer/Notifications";
+import { Private_Messages_Notifications } from "./Reducer/Private_Messages_Notifications";
 
 const composeEnhancer = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
@@ -24,7 +25,8 @@ const rootReducer = {
   Messages: Messages,
   FilterMessage: FilterMessage,
   Notifications: Notifications,
-  Users: Users
+  Users: Users,
+  PrivateMessages: Private_Messages_Notifications
 };
 export const store = createStore(
   combineReducers(rootReducer),

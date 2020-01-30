@@ -13,7 +13,6 @@ export default function FetchOtherUsersInfo(currentUser) {
         if (id !== currentUser.uid) {
           allUsers.push({ avatarUrl, id, name });
         }
-
         store.dispatch({ type: SET_USERS, users: allUsers });
       }
     });

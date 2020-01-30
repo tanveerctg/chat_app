@@ -7,7 +7,7 @@ import Badge from "@material-ui/core/Badge";
 import { firebase } from "../../firebase";
 import { store } from "../../index";
 
-function clearNotifications(userId, channelId) {
+function clearPublicNotifications(userId, channelId) {
   const NotificationsRef = firebase.database().ref("Notifications");
   NotificationsRef.child(userId)
     .child(channelId)
@@ -22,7 +22,7 @@ export default function ChannelList() {
   if (Channel.channels.length > 0 && credentialReducer.id) {
     Channel.channels.forEach(channel => {
       if (channel.id == Channel.clickedChannel.id) {
-        clearNotifications(credentialReducer.id, channel.id);
+        clearPublicNotifications(credentialReducer.id, channel.id);
       }
     });
   }
@@ -43,7 +43,7 @@ export default function ChannelList() {
             isPrivateChannel: false
           });
 
-          clearNotifications(credentialReducer.id, channel.id);
+          clearPublicNotifications(credentialReducer.id, channel.id);
         }}
         selected={!Channel.isPrivateChannel && index === clickedItem}
         key={index}

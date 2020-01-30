@@ -31,6 +31,7 @@ import uuidv4 from "uuid/v4";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import moment from "moment";
 import AllMessages from "../../Component/AllMessages/AllMessages";
+import Private_Messages from "../../Component/PrivateMessages/PrivateMessages";
 import SearchMessage from "../../Component/SearchMessage/SearchMessage";
 import SetPublicMessages from "../../Functions/SetPublicMessages";
 import SetPrivateMessages from "../../Functions/SetPrivateMessages";
@@ -72,9 +73,14 @@ function ResponsiveDrawer(props) {
   const classes = useStyles();
   const theme = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { credentialReducer, Loading, Channel, Messages } = useSelector(
-    state => state
-  );
+  const {
+    credentialReducer,
+    Loading,
+    Channel,
+    Messages,
+    PrivateMessages,
+    Users
+  } = useSelector(state => state);
 
   const [chosenEmoji, setChosenEmoji] = useState([]);
   const [allEmoji, setAllEmoji] = useState([]);
@@ -271,7 +277,7 @@ function ResponsiveDrawer(props) {
       <List>
         <AddChannel />
         <ChannelList />
-        <DirectMessaging />
+        {Users.length !== 0 && <DirectMessaging />}
       </List>
     </div>
   );
@@ -356,7 +362,12 @@ function ResponsiveDrawer(props) {
           }}
         >
           <SearchMessage />
-          <AllMessages Messages={Messages} />
+          {Channel.isPrivateChannel ? (
+            <Private_Messages />
+          ) : (
+            <AllMessages Messages={Messages} />
+          )}
+
           <div>
             <div
               style={{ display: "flex", marginLeft: "15px", flexWrap: "wrap" }}

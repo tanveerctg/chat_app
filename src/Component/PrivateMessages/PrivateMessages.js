@@ -1,24 +1,29 @@
 import React, { useEffect, useState } from "react";
 import Avatar from "@material-ui/core/Avatar";
 import { useSelector } from "react-redux";
-import pizza from "./pizza.png";
 import moment from "moment";
 import filterText from "../../filterText";
 //CSS
 import useStyles from "../../Styles/Dahboard";
 
-function AllMessages({ Messages }) {
+function PrivateMessages() {
   const classes = useStyles();
-  const { Channel, FilterMessage, credentialReducer } = useSelector(
-    state => state
-  );
+  const {
+    Channel,
+    FilterMessage,
+    credentialReducer,
+    PrivateMessages
+  } = useSelector(state => state);
+
   const [channelMessage, setChannelMessage] = useState([]);
 
   let { id, createdBy } = { ...Channel.clickedChannel };
 
-  // let channelMessage = Messages[id];
   useEffect(() => {
-    setChannelMessage(Messages[id]);
+    let channelMessage =
+      PrivateMessages[id] &&
+      PrivateMessages[id].Messages.length > 0 &&
+      setChannelMessage(PrivateMessages[id].Messages);
   });
 
   let filteredMessages;
@@ -99,4 +104,4 @@ function AllMessages({ Messages }) {
     </div>
   );
 }
-export default AllMessages;
+export default React.memo(PrivateMessages);
