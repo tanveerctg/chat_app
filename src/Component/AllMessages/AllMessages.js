@@ -19,7 +19,7 @@ function AllMessages({ Messages }) {
   // let channelMessage = Messages[id];
   useEffect(() => {
     setChannelMessage(Messages[id]);
-  });
+  }, [Messages[id] && Messages[id].length]);
 
   let filteredMessages;
   if (channelMessage) {
@@ -28,6 +28,7 @@ function AllMessages({ Messages }) {
       FilterMessage
     );
   }
+  console.log(filteredMessages);
 
   return (
     <div className={classes.bodyContent}>
