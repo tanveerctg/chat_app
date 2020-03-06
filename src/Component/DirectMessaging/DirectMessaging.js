@@ -54,7 +54,7 @@ function DirectMessaging() {
   const dispatch = useDispatch();
   const [clickedItem, setClickedItem] = useState(null);
 
-  if (PrivateMessages[Channel.clickedChannel.id]) {
+  if (Channel.clickedChanne && PrivateMessages[Channel.clickedChannel.id]) {
     Users.forEach(user => {
       if (user.id == Channel.clickedChannel.id) {
         clearPublicNotifications(credentialReducer.id, user.id);

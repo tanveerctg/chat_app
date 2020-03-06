@@ -21,7 +21,7 @@ export default function ChannelList() {
 
   if (Channel.channels.length > 0 && credentialReducer.id) {
     Channel.channels.forEach(channel => {
-      if (channel.id == Channel.clickedChannel.id) {
+      if (Channel.clickedChannel && channel.id == Channel.clickedChannel.id) {
         clearPublicNotifications(credentialReducer.id, channel.id);
       }
     });

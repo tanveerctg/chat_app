@@ -93,6 +93,7 @@ function Login(props) {
         .auth()
         .signInWithEmailAndPassword(email, password)
         .then(res => {
+          window.location.reload();
           props.dispatch({ type: CLEAR_CHANNELS });
         })
         .catch(function(error) {

@@ -270,7 +270,6 @@ function ResponsiveDrawer(props) {
           <MenuItem onClick={() => handleClose("tanveer")} disabled>
             Signed in as {credentialReducer.userName}
           </MenuItem>
-          <MenuItem onClick={() => handleClose("tanveer")}>My account</MenuItem>
           <MenuItem onClick={signOut}>Logout</MenuItem>
         </Menu>
       </div>

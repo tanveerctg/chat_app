@@ -33,7 +33,6 @@ function App(props) {
   const history = useHistory();
   const { Notifications, credentialReducer } = useSelector(state => state);
   const NotificationsRef = firebase.database().ref("Notifications");
-
   firebase
     .database()
     .ref(".info/connected")
@@ -71,7 +70,7 @@ function App(props) {
       if (user) {
         history.push("/");
         //LOG In
-        store.dispatch({ type: LOG_IN });
+        store.dispatch({ type: LOG_IN, id: user.uid });
         store.dispatch({ type: LOADING_ON });
 
         // FETCH PRIVATE MESSAGES AND NOTIFICATIONS AND THEN SET THEM TO REDUX
@@ -90,25 +89,37 @@ function App(props) {
         FetchChannelMessages(user);
 
         //SET NOTIFICATIONS TO REDUX
-        NotificationsRef.child(user.uid).on("value", snap => {
-          store.dispatch({
-            type: SET_INITIAL_NOTIFICATIONS,
-            notifications: snap.val()
-          });
-        });
+        if (store.getState().credentialReducer.id) {
+          // debugger;
+          NotificationsRef.child(store.getState().credentialReducer.id).on(
+            "value",
+            snap => {
+              console.log(
+                "USER ID",
+                store.getState().credentialReducer.id,
+                "SNAP VAL",
+                snap.val()
+              );
+              store.dispatch({
+                type: SET_INITIAL_NOTIFICATIONS,
+                notifications: snap.val()
+              });
+            }
+          );
+        }
       } else {
         // User is signed out.
         // ...
         //Clear user info from Redux
 
-        history.push("/login");
         store.dispatch({
           type: LOG_OUT
         });
+        history.push("/login");
         console.log("signout");
       }
     });
-  }, props.loading);
+  }, []);
 
   return props.loading ? (
     <Loading />

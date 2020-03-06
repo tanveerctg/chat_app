@@ -28,7 +28,6 @@ function AllMessages({ Messages }) {
       FilterMessage
     );
   }
-  console.log(filteredMessages);
 
   return (
     <div className={classes.bodyContent}>
